@@ -10,7 +10,6 @@ public class RuleResponse {
     private String productText;
     private List<RuleQueryDto> rule;
 
-
     public static class RuleQueryDto {
         private String query;
         private List<String> arguments;
