@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.Map;
 
 @Service
 public class RuleService {
@@ -43,5 +44,18 @@ public class RuleService {
 
     public void deleteRule(UUID id) {
         ruleRepository.deleteById(id);
+    }
+    public List<Map<String, Object>> getAllRulesRaw() {
+        List<String> jsonList = ruleRepository.findAll();
+        return jsonList.stream()
+                .map(json -> {
+                    try {
+                        return objectMapper.readValue(json, Map.class);
+                    } catch (Exception e) {
+                        return null;
+                    }
+                })
+                .filter(r -> r != null)
+                .collect(Collectors.toList());
     }
 }
