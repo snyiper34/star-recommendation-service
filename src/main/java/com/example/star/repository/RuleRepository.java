@@ -1,5 +1,6 @@
 package com.example.star.repository;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import java.util.List;
@@ -24,5 +25,14 @@ public class RuleRepository {
 
     public void deleteById(UUID id) {
         jdbcTemplate.update("DELETE FROM dynamic_rules WHERE id = ?", id);
+    }
+    @PostConstruct
+    public void initTable() {
+        jdbcTemplate.execute("""
+        CREATE TABLE IF NOT EXISTS dynamic_rules (
+            id UUID PRIMARY KEY,
+            rule_json TEXT NOT NULL
+        )
+    """);
     }
 }
