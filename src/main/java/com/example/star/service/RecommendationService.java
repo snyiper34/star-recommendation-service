@@ -20,6 +20,7 @@ public class RecommendationService {
     private final RuleService ruleService;
     private final ObjectMapper objectMapper;
 
+    // Кеширование
     private final Cache<String, Boolean> userOfCache = Caffeine.newBuilder()
             .expireAfterWrite(10, TimeUnit.MINUTES)
             .maximumSize(1000)
@@ -48,10 +49,12 @@ public class RecommendationService {
     public List<RecommendationDto> getRecommendations(UUID userId) {
         List<RecommendationDto> recommendations = new ArrayList<>();
 
+        // 1. Фиксированные правила
         for (RecommendationRuleSet ruleSet : ruleSets) {
             ruleSet.check(userId).ifPresent(recommendations::add);
         }
 
+        // 2. Динамические правила
         List<Map<String, Object>> dynamicRules = ruleService.getAllRulesRaw();
         for (Map<String, Object> rule : dynamicRules) {
             if (evaluateDynamicRule(userId, rule)) {

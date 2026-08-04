@@ -1,12 +1,20 @@
 package com.example.star.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.UUID;
 
 public class RuleRequest {
+    @JsonProperty("product_name")
     private String productName;
+
+    @JsonProperty("product_id")
     private UUID productId;
+
+    @JsonProperty("product_text")
     private String productText;
+
+    @JsonProperty("rule")
     private List<RuleQueryDto> rule;
 
     public static class RuleQueryDto {

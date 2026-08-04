@@ -1,38 +1,10 @@
 package com.example.star.repository;
 
-import jakarta.annotation.PostConstruct;
-import org.springframework.jdbc.core.JdbcTemplate;
+import com.example.star.entity.RuleEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import java.util.List;
 import java.util.UUID;
 
 @Repository
-public class RuleRepository {
-    private final JdbcTemplate jdbcTemplate;
-
-    public RuleRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
-    public void save(UUID id, String json) {
-        String sql = "INSERT INTO dynamic_rules (id, rule_json) VALUES (?, ?)";
-        jdbcTemplate.update(sql, id, json);
-    }
-
-    public List<String> findAll() {
-        return jdbcTemplate.queryForList("SELECT rule_json FROM dynamic_rules", String.class);
-    }
-
-    public void deleteById(UUID id) {
-        jdbcTemplate.update("DELETE FROM dynamic_rules WHERE id = ?", id);
-    }
-    @PostConstruct
-    public void initTable() {
-        jdbcTemplate.execute("""
-        CREATE TABLE IF NOT EXISTS dynamic_rules (
-            id UUID PRIMARY KEY,
-            rule_json TEXT NOT NULL
-        )
-    """);
-    }
+public interface RuleRepository extends JpaRepository<RuleEntity, UUID> {
 }

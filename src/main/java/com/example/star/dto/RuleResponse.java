@@ -1,14 +1,31 @@
 package com.example.star.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.UUID;
 
 public class RuleResponse {
     private UUID id;
+
+    @JsonProperty("product_name")
     private String productName;
+
+    @JsonProperty("product_id")
     private UUID productId;
+
+    @JsonProperty("product_text")
     private String productText;
+
+    @JsonProperty("rule")
     private List<RuleQueryDto> rule;
+
+    public RuleResponse(UUID id, String productName, UUID productId, String productText, List<RuleQueryDto> rule) {
+        this.id = id;
+        this.productName = productName;
+        this.productId = productId;
+        this.productText = productText;
+        this.rule = rule;
+    }
 
     public static class RuleQueryDto {
         private String query;
@@ -24,14 +41,6 @@ public class RuleResponse {
         public String getQuery() { return query; }
         public List<String> getArguments() { return arguments; }
         public boolean isNegate() { return negate; }
-    }
-
-    public RuleResponse(UUID id, String productName, UUID productId, String productText, List<RuleQueryDto> rule) {
-        this.id = id;
-        this.productName = productName;
-        this.productId = productId;
-        this.productText = productText;
-        this.rule = rule;
     }
 
     public UUID getId() { return id; }
