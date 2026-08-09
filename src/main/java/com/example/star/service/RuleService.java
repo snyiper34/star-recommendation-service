@@ -5,22 +5,40 @@ import com.example.star.dto.RuleResponse;
 import com.example.star.entity.RuleEntity;
 import com.example.star.entity.RuleQueryEntity;
 import com.example.star.repository.RuleRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Сервис для управления динамическими правилами рекомендаций.
+ * Предоставляет CRUD-операции для правил.
+ */
 @Service
 public class RuleService {
+
+    private static final Logger logger = LoggerFactory.getLogger(RuleService.class);
+
     private final RuleRepository ruleRepository;
 
     public RuleService(RuleRepository ruleRepository) {
         this.ruleRepository = ruleRepository;
     }
 
+    /**
+     * Создать новое динамическое правило.
+     *
+     * @param request DTO с данными правила
+     * @return созданное правило с присвоенным ID
+     */
     @Transactional
     public RuleResponse createRule(RuleRequest request) {
+        logger.info("Creating new rule for product: {}", request.getProductName());
+        logger.debug("Rule request: {}", request);
+
         List<RuleQueryEntity> queries = request.getRule().stream()
                 .map(q -> new RuleQueryEntity(
                         q.getQuery(),
@@ -38,6 +56,7 @@ public class RuleService {
         );
 
         RuleEntity saved = ruleRepository.save(entity);
+        logger.info("Rule created successfully with id: {}", saved.getId());
 
         List<RuleResponse.RuleQueryDto> responseQueries = saved.getQueries().stream()
                 .map(q -> new RuleResponse.RuleQueryDto(
@@ -56,8 +75,14 @@ public class RuleService {
         );
     }
 
+    /**
+     * Получить все динамические правила в виде DTO.
+     *
+     * @return список всех правил
+     */
     public List<RuleResponse> getAllRules() {
-        return ruleRepository.findAll().stream()
+        logger.info("Getting all rules");
+        List<RuleResponse> rules = ruleRepository.findAll().stream()
                 .map(entity -> {
                     List<RuleResponse.RuleQueryDto> queries = entity.getQueries().stream()
                             .map(q -> new RuleResponse.RuleQueryDto(
@@ -75,8 +100,18 @@ public class RuleService {
                     );
                 })
                 .collect(Collectors.toList());
+        logger.debug("Found {} rules", rules.size());
+        return rules;
     }
+
+    /**
+     * Получить все динамические правила в сыром виде (Map).
+     * Используется для проверки условий в RecommendationService.
+     *
+     * @return список правил в виде Map
+     */
     public List<Map<String, Object>> getAllRulesRaw() {
+        logger.debug("Getting all rules raw");
         List<RuleEntity> entities = ruleRepository.findAll();
         List<Map<String, Object>> result = new ArrayList<>();
 
@@ -100,10 +135,22 @@ public class RuleService {
             result.add(ruleMap);
         }
 
+        logger.debug("Found {} raw rules", result.size());
         return result;
     }
 
+    /**
+     * Удалить правило по ID.
+     *
+     * @param id идентификатор правила
+     */
     public void deleteRule(UUID id) {
+        logger.warn("Deleting rule with id: {}", id);
+        if (!ruleRepository.existsById(id)) {
+            logger.error("Rule not found with id: {}", id);
+            throw new RuntimeException("Rule not found with id: " + id);
+        }
         ruleRepository.deleteById(id);
+        logger.info("Rule deleted successfully with id: {}", id);
     }
 }
